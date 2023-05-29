@@ -1,0 +1,25 @@
+stages:
+  - build
+
+build_images:
+  stage: build
+  image: docker:20.10.16
+
+  services:
+    - docker:20.10.16-dind
+  
+  variables: 
+    DOCKER_TLS_CERTDIR: "/certs"
+
+  before_script:
+    - docker login -u $REGISTRY_USER -p $REGISTRY_PASS
+
+  script:
+    - docker build -t vinicius/kubernetes-projeto2-dio:1.0 app/.
+    - docker push vinicius/kubernetes-projeto2-dio:1.0
+
+  before_script:
+    - chmod 400 $SSH_KEY
+  
+  script:
+      - ssh -o StrictHostKeyChecking=no -i $SSH_KEY gcp@$SSH_SERVER "sudo rm -Rf ./kubernets-projeto-vini2/ && sudo git clone https://gitlab.com/bootcamp-devops9155022/criando-um-pipeline-de-deploy-com-gitlab-e-kubernetes.git && cd kubernets-projeto-vini2 && sudo chmod +x ./script.sh && ./script.sh"
